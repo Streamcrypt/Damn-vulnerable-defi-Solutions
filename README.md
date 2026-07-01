@@ -1,16 +1,27 @@
-# Damn Vulnerable DeFi - v4 Solution (Foundry)
+# Damn Vulnerable DeFi - v4 Solutions (Foundry)
 
-This repository contains my complete solutions to the Damn Vulnerable DeFi challenges, implemented using Foundry.
+This repository contains my complete solutions to the **Damn Vulnerable DeFi (v4)** challenges, implemented using **Foundry**.
 
-The main change made to the original Damn Vulnerable DeFi v4 repository codebase is that:
+The main modification made to the original Damn Vulnerable DeFi v4 codebase is as follows:
 
-In some challenge folders within the `test` directory, I added a `<challengeName>_exploiter.sol` file to help automate the bug that was required to be solved in each specific challenge.
+In several challenge folders under the `test/` directory, I added a `<challengeName>_exploiter.sol` file to automate the exploitation logic required to solve each specific challenge.
 
-You can check the original unsolved codebase here: https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0
+### Dependencies
 
-All challenges are covered here, specifically for the v4 version.
+Some external protocol dependencies are included:
+
+* `aave-v3-core` in `lib/` corresponds to **Aave V3**
+* `protocol-v2` in `lib/` corresponds to **Aave V2**
+
+You can find the original unsolved codebase here:
+[https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0](https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0)
+
+All challenges are fully solved for the v4 version.
+
+---
 
 ## ⚠️ Disclaimer
 
 This repository is for educational purposes only.
-All vulnerabilities demonstrated are from intentionally insecure contracts.
+All vulnerabilities demonstrated exist in intentionally insecure smart contracts used for learning purposes.
+
