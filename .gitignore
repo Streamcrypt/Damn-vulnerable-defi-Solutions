@@ -3,4 +3,5 @@ cache/
 artifacts/
 node_modules/
 .env
-.wake
+.wake/
+.vscode/
