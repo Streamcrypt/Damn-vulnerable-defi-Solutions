@@ -15,7 +15,6 @@ Some external protocol dependencies are included:
 
 You can find the original unsolved codebase here:
 [https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0](https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0)
-
 Alternatively, you can refer to the `master` branch in this repository, which tracks the original upstream codebase.
 
 
