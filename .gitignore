@@ -1,21 +1,5 @@
-# IDE
-.vscode/
-.idea/
-
-# Foundry / build artifacts
 out/
 cache/
-broadcast/
-lib/
-
-# Wake
-.wake/
-
-# env
-.env
-
-# logs
-*.log
-
-# node
+artifacts/
 node_modules/
+.env
