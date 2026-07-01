@@ -1,14 +1,21 @@
-# Compiler files
-cache/
+# IDE
+.vscode/
+.idea/
+
+# Foundry / build artifacts
 out/
+cache/
+broadcast/
+lib/
 
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
+# Wake
+.wake/
 
-# Docs
-docs/
-
-# Dotenv file
+# env
 .env
+
+# logs
+*.log
+
+# node
+node_modules/

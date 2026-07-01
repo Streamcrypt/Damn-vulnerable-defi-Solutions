@@ -14,3 +14,5 @@ safe-smart-account/=lib/safe-smart-account/
 solady/=lib/solady/src/
 solmate/=lib/solmate/src/
 permit2/=lib/permit2/src/
+@aave/core-v3/=lib/aave-v3-core
+@aave/core-v2/=lib/protocol-v2

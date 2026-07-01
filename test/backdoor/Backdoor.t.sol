@@ -7,6 +7,8 @@ import {Safe} from "@safe-global/safe-smart-account/contracts/Safe.sol";
 import {SafeProxyFactory} from "@safe-global/safe-smart-account/contracts/proxies/SafeProxyFactory.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
 import {WalletRegistry} from "../../src/backdoor/WalletRegistry.sol";
+import {DataEncoder, WalletDrainer} from "./Backdoor_exploiter.sol";
+import {IProxyCreationCallback} from "safe-smart-account/contracts/proxies/IProxyCreationCallback.sol";
 
 contract BackdoorChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -59,7 +61,7 @@ contract BackdoorChallenge is Test {
             // Users are registered as beneficiaries
             assertTrue(walletRegistry.beneficiaries(users[i]));
 
-            // User cannot add beneficiaries
+            // User cannhttps://search.bravecom/ask?q=ohh+so+it+gives+the+contract+the+ability+to+read+values+stored+at+a+specific+storage+slot%3F+how%3F&source=quick-answer-followup&conversation=08ffdede95c5376d2e73a75e6daf7b0050a8ot add beneficiaries
             vm.expectRevert(bytes4(hex"82b42900")); // `Unauthorized()`
             vm.prank(users[i]);
             walletRegistry.addBeneficiary(users[i]);
@@ -70,8 +72,10 @@ contract BackdoorChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_backdoor() public checkSolvedByPlayer {
-        
+      WalletDrainer attacker = new WalletDrainer();
+      attacker.execute(users, address(singletonCopy), address(walletRegistry), SafeProxyFactory(walletFactory),recovery, DamnValuableToken(token));      
     }
+
 
     /**
      * CHECKS SUCCESS CONDITIONS - DO NOT TOUCH
@@ -94,3 +98,18 @@ contract BackdoorChallenge is Test {
         assertEq(token.balanceOf(recovery), AMOUNT_TOKENS_DISTRIBUTED);
     }
 }
+
+/**
+Callback is the adddress of the walletregistry when calling to the safefactory.createproxywithcallback
+set your singleton to the implementation address which is the singletoncopy that was deploy in the test
+make saltnonce to be unique for each 4 loop calls 
+set  init to be the initialization that meet the requirement of the walletregistry function
+Exploit
+use a contract to loop 4 times when calling and withdraw all funds from 4 users
+*/
+
+/**
+Safe.setup
+
+setup() initializes the Safe by setting owners and threshold (who controls it and how many approvals are needed), optionally executing an initial transaction (to + data), optionally setting a fallbackHandler for unknown calls/extended wallet behavior, and optionally sending a setup fee (ETH if paymentToken = address(0), otherwise ERC20 tokens) to paymentReceiver.
+ */

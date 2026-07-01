@@ -21,7 +21,7 @@ contract L1Gateway is OwnableRoles {
 
     event ValidProof(bytes32[] proof, bytes32 root, bytes32 leaf);
     event FinalizedWithdrawal(bytes32 leaf, bool success, bool isOperator);
-
+ 
     constructor() {
         _initializeOwner(msg.sender);
     }
@@ -69,3 +69,20 @@ contract L1Gateway is OwnableRoles {
         emit FinalizedWithdrawal(leaf, success, isOperator);
     }
 }
+
+/**
+2
+0xea475d60c118d7058beF4bDd9c32bA51139a74e0
+0x9c52B2C4A89E2BE37972d18dA937cbAd8AA8bd50
+0x81191e5100000000000000000000000044e97af4418b7a17aabd8090bea0a471a366305c00000000000000000000000000000000000000000000d38be6051f27c2600000
+
+
+ */
+
+ /**
+ 2
+0xea475d60c118d7058beF4bDd9c32bA51139a74e0
+0x9c52B2C4A89E2BE37972d18dA937cbAd8AA8bd50
+0x81191e51000000000000000000000000ea475d60c118d7058bef4bdd9c32ba51139a74e00000000000000000000000000000000000000000000000000000000000000000
+
+ */

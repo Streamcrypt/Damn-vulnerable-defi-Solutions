@@ -1,0 +1,209 @@
+'forge clean' running (wd: /home/oxactlysis/Workshop/damn-vulnerable-defi)
+'forge config --json' running
+'forge build --build-info src/naive-receiver' running (wd: /home/oxactlysis/Workshop/damn-vulnerable-defi)
+
+INFO:Detectors:
+Detector: arbitrary-send-erc20
+NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64) uses arbitrary from in transferFrom: weth.transferFrom(address(receiver),address(this),amountWithFee) (src/naive-receiver/NaiveReceiverPool.sol#58)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-
+
+INFO:Detectors:
+Detector: unchecked-transfer
+NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64) ignores return value by weth.transfer(address(receiver),amount) (src/naive-receiver/NaiveReceiverPool.sol#50)
+NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64) ignores return value by weth.transferFrom(address(receiver),address(this),amountWithFee) (src/naive-receiver/NaiveReceiverPool.sol#58)
+NaiveReceiverPool.withdraw(uint256,address) (src/naive-receiver/NaiveReceiverPool.sol#66-73) ignores return value by weth.transfer(receiver,amount) (src/naive-receiver/NaiveReceiverPool.sol#72)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+
+INFO:Detectors:
+Detector: reentrancy-no-eth
+Reentrancy in NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64):
+	External calls:
+	- weth.transfer(address(receiver),amount) (src/naive-receiver/NaiveReceiverPool.sol#50)
+	- receiver.onFlashLoan(msg.sender,address(weth),amount,FIXED_FEE,data) != CALLBACK_SUCCESS (src/naive-receiver/NaiveReceiverPool.sol#53)
+	- weth.transferFrom(address(receiver),address(this),amountWithFee) (src/naive-receiver/NaiveReceiverPool.sol#58)
+	State variables written after the call(s):
+	- totalDeposits += amountWithFee (src/naive-receiver/NaiveReceiverPool.sol#59)
+	NaiveReceiverPool.totalDeposits (src/naive-receiver/NaiveReceiverPool.sol#20) can be used in cross function reentrancies:
+	- NaiveReceiverPool._deposit(uint256) (src/naive-receiver/NaiveReceiverPool.sol#79-84)
+	- NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64)
+	- NaiveReceiverPool.totalDeposits (src/naive-receiver/NaiveReceiverPool.sol#20)
+	- NaiveReceiverPool.withdraw(uint256,address) (src/naive-receiver/NaiveReceiverPool.sol#66-73)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+
+INFO:Detectors:
+Detector: unused-return
+FlashLoanReceiver.onFlashLoan(address,address,uint256,uint256,bytes) (src/naive-receiver/FlashLoanReceiver.sol#15-40) ignores return value by WETH(address(token)).approve(pool,amountToBeRepaid) (src/naive-receiver/FlashLoanReceiver.sol#37)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+INFO:Detectors:
+Detector: events-maths
+NaiveReceiverPool.withdraw(uint256,address) (src/naive-receiver/NaiveReceiverPool.sol#66-73) should emit an event for: 
+	- totalDeposits -= amount (src/naive-receiver/NaiveReceiverPool.sol#69) 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-events-arithmetic
+
+INFO:Detectors:
+Detector: missing-zero-check
+FlashLoanReceiver.constructor(address)._pool (src/naive-receiver/FlashLoanReceiver.sol#11) lacks a zero-check on :
+		- pool = _pool (src/naive-receiver/FlashLoanReceiver.sol#12)
+NaiveReceiverPool.constructor(address,address,address)._trustedForwarder (src/naive-receiver/NaiveReceiverPool.sol#26) lacks a zero-check on :
+		- trustedForwarder = _trustedForwarder (src/naive-receiver/NaiveReceiverPool.sol#28)
+NaiveReceiverPool.constructor(address,address,address)._feeReceiver (src/naive-receiver/NaiveReceiverPool.sol#26) lacks a zero-check on :
+		- feeReceiver = _feeReceiver (src/naive-receiver/NaiveReceiverPool.sol#29)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+INFO:Detectors:
+Detector: reentrancy-benign
+Reentrancy in NaiveReceiverPool._deposit(uint256) (src/naive-receiver/NaiveReceiverPool.sol#79-84):
+	External calls:
+	- weth.deposit{value: amount}() (src/naive-receiver/NaiveReceiverPool.sol#80)
+	State variables written after the call(s):
+	- deposits[_msgSender()] += amount (src/naive-receiver/NaiveReceiverPool.sol#82)
+	- totalDeposits += amount (src/naive-receiver/NaiveReceiverPool.sol#83)
+
+Reentrancy in NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64):
+	External calls:
+	- weth.transfer(address(receiver),amount) (src/naive-receiver/NaiveReceiverPool.sol#50)
+	State variables written after the call(s):
+	- totalDeposits -= amount (src/naive-receiver/NaiveReceiverPool.sol#51)
+
+Reentrancy in NaiveReceiverPool.flashLoan(IERC3156FlashBorrower,address,uint256,bytes) (src/naive-receiver/NaiveReceiverPool.sol#43-64):
+	External calls:
+	- weth.transfer(address(receiver),amount) (src/naive-receiver/NaiveReceiverPool.sol#50)
+	- receiver.onFlashLoan(msg.sender,address(weth),amount,FIXED_FEE,data) != CALLBACK_SUCCESS (src/naive-receiver/NaiveReceiverPool.sol#53)
+	- weth.transferFrom(address(receiver),address(this),amountWithFee) (src/naive-receiver/NaiveReceiverPool.sol#58)
+	State variables written after the call(s):
+	- deposits[feeReceiver] += FIXED_FEE (src/naive-receiver/NaiveReceiverPool.sol#61)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+
+INFO:Detectors:
+Detector: timestamp
+ERC20.permit(address,address,uint256,uint256,uint8,bytes32,bytes32) (lib/solmate/src/tokens/ERC20.sol#116-160) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(deadline >= block.timestamp,PERMIT_DEADLINE_EXPIRED) (lib/solmate/src/tokens/ERC20.sol#125)
+
+BasicForwarder._checkRequest(BasicForwarder.Request,bytes) (src/naive-receiver/BasicForwarder.sol#44-53) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > request.deadline (src/naive-receiver/BasicForwarder.sol#46)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+INFO:Detectors:
+Detector: assembly
+Address._revert(bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#138-149) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/Address.sol#142-145)
+ECDSA.tryRecover(bytes32,bytes) (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#56-75) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#66-70)
+EIP712.constructor() (lib/solady/src/utils/EIP712.sol#38-65) uses assembly
+	- INLINE ASM (lib/solady/src/utils/EIP712.sol#54-62)
+EIP712._hashTypedData(bytes32) (lib/solady/src/utils/EIP712.sol#124-142) uses assembly
+	- INLINE ASM (lib/solady/src/utils/EIP712.sol#133-141)
+EIP712._buildDomainSeparator() (lib/solady/src/utils/EIP712.sol#176-197) uses assembly
+	- INLINE ASM (lib/solady/src/utils/EIP712.sol#188-196)
+EIP712._cachedDomainSeparatorInvalidated() (lib/solady/src/utils/EIP712.sol#200-207) uses assembly
+	- INLINE ASM (lib/solady/src/utils/EIP712.sol#204-206)
+SafeTransferLib.safeTransferETH(address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#15-25) uses assembly
+	- INLINE ASM (lib/solmate/src/utils/SafeTransferLib.sol#19-22)
+SafeTransferLib.safeTransferFrom(ERC20,address,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#31-63) uses assembly
+	- INLINE ASM (lib/solmate/src/utils/SafeTransferLib.sol#40-60)
+SafeTransferLib.safeTransfer(ERC20,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#65-95) uses assembly
+	- INLINE ASM (lib/solmate/src/utils/SafeTransferLib.sol#73-92)
+SafeTransferLib.safeApprove(ERC20,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#97-127) uses assembly
+	- INLINE ASM (lib/solmate/src/utils/SafeTransferLib.sol#105-124)
+BasicForwarder.execute(BasicForwarder.Request,bytes) (src/naive-receiver/BasicForwarder.sol#55-75) uses assembly
+	- INLINE ASM (src/naive-receiver/BasicForwarder.sol#65-68)
+	- INLINE ASM (src/naive-receiver/BasicForwarder.sol#71-73)
+FlashLoanReceiver.onFlashLoan(address,address,uint256,uint256,bytes) (src/naive-receiver/FlashLoanReceiver.sol#15-40) uses assembly
+	- INLINE ASM (src/naive-receiver/FlashLoanReceiver.sol#19-25)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Detectors:
+Detector: pragma
+4 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashBorrower.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashLender.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Address.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Errors.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)
+	- Version constraint ^0.8.4 is used by:
+		-^0.8.4 (lib/solady/src/utils/EIP712.sol#2)
+	- Version constraint >=0.8.0 is used by:
+		->=0.8.0 (lib/solmate/src/tokens/ERC20.sol#2)
+		->=0.8.0 (lib/solmate/src/tokens/WETH.sol#2)
+		->=0.8.0 (lib/solmate/src/utils/SafeTransferLib.sol#2)
+	- Version constraint =0.8.25 is used by:
+		-=0.8.25 (src/naive-receiver/BasicForwarder.sol#3)
+		-=0.8.25 (src/naive-receiver/FlashLoanReceiver.sol#3)
+		-=0.8.25 (src/naive-receiver/Multicall.sol#3)
+		-=0.8.25 (src/naive-receiver/NaiveReceiverPool.sol#3)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+Detector: solc-version
+Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- VerbatimInvalidDeduplication
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess.
+It is used by:
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashBorrower.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/interfaces/IERC3156FlashLender.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Address.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Context.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/Errors.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol#4)
+Version constraint ^0.8.4 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables.
+It is used by:
+	- ^0.8.4 (lib/solady/src/utils/EIP712.sol#2)
+Version constraint >=0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching.
+It is used by:
+	- >=0.8.0 (lib/solmate/src/tokens/ERC20.sol#2)
+	- >=0.8.0 (lib/solmate/src/tokens/WETH.sol#2)
+	- >=0.8.0 (lib/solmate/src/utils/SafeTransferLib.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in Address.sendValue(address,uint256) (lib/openzeppelin-contracts/contracts/utils/Address.sol#33-42):
+	- (success,returndata) = recipient.call{value: amount}() (lib/openzeppelin-contracts/contracts/utils/Address.sol#38)
+Low level call in Address.functionCallWithValue(address,bytes,uint256) (lib/openzeppelin-contracts/contracts/utils/Address.sol#75-81):
+	- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#79)
+Low level call in Address.functionStaticCall(address,bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87-90):
+	- (success,returndata) = target.staticcall(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#88)
+Low level call in Address.functionDelegateCall(address,bytes) (lib/openzeppelin-contracts/contracts/utils/Address.sol#96-99):
+	- (success,returndata) = target.delegatecall(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#97)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Detector: naming-convention
+Function ERC20.DOMAIN_SEPARATOR() (lib/solmate/src/tokens/ERC20.sol#162-164) is not in mixedCase
+Variable ERC20.INITIAL_CHAIN_ID (lib/solmate/src/tokens/ERC20.sol#41) is not in mixedCase
+Variable ERC20.INITIAL_DOMAIN_SEPARATOR (lib/solmate/src/tokens/ERC20.sol#43) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+Detector: too-many-digits
+SafeTransferLib.safeTransferFrom(ERC20,address,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#31-63) uses literals with too many digits:
+	- mstore(uint256,uint256)(freeMemoryPointer_safeTransferFrom_asm_0,0x23b872dd00000000000000000000000000000000000000000000000000000000) (lib/solmate/src/utils/SafeTransferLib.sol#45)
+SafeTransferLib.safeTransfer(ERC20,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#65-95) uses literals with too many digits:
+	- mstore(uint256,uint256)(freeMemoryPointer_safeTransfer_asm_0,0xa9059cbb00000000000000000000000000000000000000000000000000000000) (lib/solmate/src/utils/SafeTransferLib.sol#78)
+SafeTransferLib.safeApprove(ERC20,address,uint256) (lib/solmate/src/utils/SafeTransferLib.sol#97-127) uses literals with too many digits:
+	- mstore(uint256,uint256)(freeMemoryPointer_safeApprove_asm_0,0x095ea7b300000000000000000000000000000000000000000000000000000000) (lib/solmate/src/utils/SafeTransferLib.sol#110)
+EIP712._hashTypedData(bytes32) (lib/solady/src/utils/EIP712.sol#124-142) uses literals with too many digits:
+	- mstore(uint256,uint256)(0x00,0x1901000000000000) (lib/solady/src/utils/EIP712.sol#135)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+INFO:Detectors:
+Detector: immutable-states
+FlashLoanReceiver.pool (src/naive-receiver/FlashLoanReceiver.sol#9) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+INFO:Slither:. analyzed (15 contracts with 101 detectors), 43 result(s) found

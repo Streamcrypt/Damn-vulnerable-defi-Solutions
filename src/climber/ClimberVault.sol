@@ -35,10 +35,8 @@ contract ClimberVault is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         // Initialize inheritance chain
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
-
         // Deploy timelock and transfer ownership to it
         transferOwnership(address(new ClimberTimelock(admin, proposer)));
-
         _setSweeper(sweeper);
         _updateLastWithdrawalTimestamp(block.timestamp);
     }

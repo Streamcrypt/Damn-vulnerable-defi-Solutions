@@ -132,9 +132,6 @@ contract ShardsNFTMarketplace is IShardsNFTMarketplace, IERC721Receiver, ERC1155
                 cancelled: false
             })
         );
-        paymentToken.transferFrom(
-            msg.sender, address(this), want.mulDivDown(_toDVT(offer.price, _currentRate), offer.totalShards)
-        );
         if (offer.stock == 0) _closeOffer(offerId);
     }
 
