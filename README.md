@@ -6,7 +6,7 @@ The main change made to the original Damn Vulnerable DeFi v4 repository codebase
 
 In some challenge folders within the `test` directory, I added a `<challengeName>_exploiter.sol` file to help automate the bug that was required to be solved in each specific challenge.
 
-You can check the original unsolved codebase here: https://github.com/OpenZeppelin/damn-vulnerable-defi
+You can check the original unsolved codebase here: https://github.com/theredguild/damn-vulnerable-defi/tree/v4.1.0
 
 All challenges are covered here, specifically for the v4 version.
 
